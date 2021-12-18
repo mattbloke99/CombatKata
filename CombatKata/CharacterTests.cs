@@ -55,8 +55,8 @@ namespace CombatKata
         [Fact]
         public void HealCharacterTest()
         {
-            var healer = new Character();
             var patient = new Character(500, 1, true);
+            var healer = patient;
 
             patient.Heal(healer, 100);
 
@@ -67,8 +67,8 @@ namespace CombatKata
         [Fact]
         public void CannotHealCharacterMoreThanLimitTest()
         {
-            var healer = new Character();
             var patient = new Character(500, 1, true);
+            var healer = patient;
 
             patient.Heal(healer, 1000);
 
@@ -76,6 +76,54 @@ namespace CombatKata
             Assert.True(patient.Alive);
         }
 
+        [Fact]
+        public void CharacterCannotDamageItselfTest()
+        {
+            var attacker = new Character();
+            var victim = attacker;
+
+            victim.Attack(attacker, 100);
+
+            Assert.True(attacker.GetHashCode() == victim.GetHashCode());
+            Assert.Equal(1000, victim.Health);
+            Assert.True(victim.Alive);
+        }
+
+        [Fact]
+        public void CharacterCannotHealAnotherCharacterTest()
+        {
+            var healer = new Character();
+            var patient = new Character(500, 1, true);
+
+            patient.Heal(healer, 100);
+
+            Assert.Equal(500, patient.Health);
+            Assert.True(patient.Alive);
+        }
+
+        [Fact]
+        public void CharacterVictimStrongerReduceDamageTest()
+        {
+            var attacker = new Character();
+            var victim = new Character(1000, 6, true);
+
+            victim.Attack(attacker, 200);
+
+            Assert.Equal(900, victim.Health);
+            Assert.True(victim.Alive);
+        }
+
+        [Fact]
+        public void CharacterAttackerStrongerIncreaseDamageTest()
+        {
+            var attacker = new Character(1000, 6, true);
+            var victim = new Character();
+
+            victim.Attack(attacker, 200);
+
+            Assert.Equal(700, victim.Health);
+            Assert.True(victim.Alive);
+        }
 
         internal class Character
         {
@@ -97,17 +145,40 @@ namespace CombatKata
 
             internal void Attack(Character attacker, int damage)
             {
-                Health -= damage;
-                Health = Health <= 0 ? 0 : Health;
-                Alive = Health > 0;
+                decimal damageModifier = CalculateDamageModifier(attacker);
+
+                if (this != attacker)
+                {
+                    Health -= (int)decimal.Multiply(damage, damageModifier);
+                    Health = Health <= 0 ? 0 : Health;
+                    Alive = Health > 0;
+                }
+            }
+
+            private decimal CalculateDamageModifier(Character attacker)
+            {
+                if (this.Level - attacker.Level >= 5)
+                {
+                    return 0.5m;
+                }
+
+                if (attacker.Level - this.Level >= 5)
+                {
+                    return 1.5m;
+                }
+
+                return 1;
             }
 
             internal void Heal(Character healer, int health)
             {
-                if (Alive)
+                if (this == healer)
                 {
-                    Health += health;
-                    Health = Health > 1000 ? 1000 : Health;
+                    if (Alive)
+                    {
+                        Health += health;
+                        Health = Health > 1000 ? 1000 : Health;
+                    }
                 }
             }
         }
