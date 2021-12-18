@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Xunit;
 
 namespace CombatKata
@@ -125,6 +126,40 @@ namespace CombatKata
             Assert.True(victim.Alive);
         }
 
+
+        [Fact]
+        public void GetMeleeCharacterAttackRangeTest()
+        {
+            var character = new Character(1000, 1, true, FighterType.Melee);
+
+            Assert.Equal(2, character.GetAttackRange());
+        }
+
+        [Fact]
+        public void CharacterAttackerNotWithinRangeTest()
+        {
+            var attacker = new Character(1000, 1, true, FighterType.Melee);
+            var victim = new Character();
+
+            victim.Attack(attacker, 200, 3);
+
+            Assert.Equal(1000, victim.Health);
+            Assert.True(victim.Alive);
+        }
+
+        [Fact]
+        public void CharacterAttackertWithinRangeTest()
+        {
+            var attacker = new Character(1000, 1, true, FighterType.Melee);
+            var victim = new Character();
+
+            victim.Attack(attacker, 200, 2);
+
+            Assert.Equal(800, victim.Health);
+            Assert.True(victim.Alive);
+        }
+
+
         internal class Character
         {
             public Character() { }
@@ -132,26 +167,50 @@ namespace CombatKata
             //I created this constructor so I can create a character with initial values
             //and still keep the setters private on the properties below
             //for better encapsulation
-            public Character(int health, int level, bool alive)
+
+            //being a bit lazy here. Defaulting the fighter type to Melee means I don't need to change my old tests.
+            //an alternative would be to create another constuctor
+            public Character(int health, int level, bool alive, FighterType fighterType = FighterType.Melee)
             {
                 Health = health;
                 Level = level;
                 Alive = alive;
+                FighterType = fighterType;
             }
 
             public int Health { get; private set; } = 1000;
             public int Level { get; private set; } = 1;
             public bool Alive { get; private set; } = true;
-
-            internal void Attack(Character attacker, int damage)
+            public FighterType FighterType { get; }
+            public int GetAttackRange()
             {
-                decimal damageModifier = CalculateDamageModifier(attacker);
-
-                if (this != attacker)
+                switch (FighterType)
                 {
-                    Health -= (int)decimal.Multiply(damage, damageModifier);
-                    Health = Health <= 0 ? 0 : Health;
-                    Alive = Health > 0;
+                    case FighterType.Melee:
+                        return 2;
+                    case FighterType.Ranged:
+                        return 20;
+                    default:
+                        throw new System.Exception();
+                }
+
+            }
+
+            //again defaulting attackDistance to zero so I don't need to edit existing calls.
+            //alternative I could create another method with the same name but different parameters.
+            //this is known as overloading and is part of polymorphism in OO
+            internal void Attack(Character attacker, int damage, int attackDistance = 0)
+            {
+                if (attackDistance <= attacker.GetAttackRange())
+                {
+                    decimal damageModifier = CalculateDamageModifier(attacker);
+
+                    if (this != attacker)
+                    {
+                        Health -= (int)decimal.Multiply(damage, damageModifier);
+                        Health = Health <= 0 ? 0 : Health;
+                        Alive = Health > 0;
+                    }
                 }
             }
 
@@ -182,5 +241,12 @@ namespace CombatKata
                 }
             }
         }
+    }
+
+    enum FighterType
+    {
+        Melee,
+        Ranged
+
     }
 }
