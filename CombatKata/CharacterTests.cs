@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Xunit;
+using System.Linq;
 
 namespace CombatKata
 {
@@ -15,6 +17,7 @@ namespace CombatKata
             Assert.Equal(1000, character.Health);
             Assert.Equal(1, character.Level);
             Assert.True(character.Alive);
+            Assert.Empty(character.Factions);
         }
 
         [Fact]
@@ -159,6 +162,85 @@ namespace CombatKata
             Assert.True(victim.Alive);
         }
 
+        [Fact]
+        public void CharacterJoinFactionTest()
+        {
+            var character = new Character();
+
+            character.JoinFaction(Faction.Cleric);
+
+            Assert.True(character.Factions.Contains(Faction.Cleric));
+        }
+
+        [Fact]
+        public void CharacteLeaveFactionTest()
+        {
+            var character = new Character();
+
+            character.JoinFaction(Faction.Cleric);
+            character.LeaveFaction(Faction.Cleric);
+
+            Assert.False(character.Factions.Contains(Faction.Cleric));
+        }
+
+
+        [Fact]
+        public void CharacterAttackAllyDoesNoDamage()
+        {
+            var attacker = new Character();
+            attacker.JoinFaction(Faction.Wizard);
+
+            var victim = new Character();
+            victim.JoinFaction(Faction.Wizard);
+
+            victim.Attack(attacker, 200);
+
+            Assert.Equal(1000, victim.Health);
+            Assert.True(victim.Alive);
+        }
+
+        [Fact]
+        public void CharacterAttackNonAllyDoesDamage()
+        {
+            var attacker = new Character();
+            attacker.JoinFaction(Faction.Wizard);
+
+            var victim = new Character();
+            victim.JoinFaction(Faction.Cleric);
+
+            victim.Attack(attacker, 200);
+
+            Assert.Equal(800, victim.Health);
+            Assert.True(victim.Alive);
+        }
+
+        [Fact]
+        public void CharacterHealAlly()
+        {
+            var patient = new Character(500, 1, true);
+            patient.JoinFaction(Faction.Ranger);
+            var healer = new Character();
+            healer.JoinFaction(Faction.Ranger);
+
+            patient.Heal(healer, 100);
+
+            Assert.Equal(600, patient.Health);
+            Assert.True(patient.Alive);
+        }
+
+        [Fact]
+        public void CharacterCannotHealNonAlly()
+        {
+            var patient = new Character(500, 1, true);
+            patient.JoinFaction(Faction.Ranger);
+            var healer = new Character();
+            healer.JoinFaction(Faction.Wizard);
+
+            patient.Heal(healer, 100);
+
+            Assert.Equal(500, patient.Health);
+            Assert.True(patient.Alive);
+        }
 
         internal class Character
         {
@@ -182,6 +264,8 @@ namespace CombatKata
             public int Level { get; private set; } = 1;
             public bool Alive { get; private set; } = true;
             public FighterType FighterType { get; }
+            public IList<Faction> Factions { get; private set; } = new List<Faction>();
+
             public int GetAttackRange()
             {
                 switch (FighterType)
@@ -191,7 +275,7 @@ namespace CombatKata
                     case FighterType.Ranged:
                         return 20;
                     default:
-                        throw new System.Exception();
+                        throw new Exception();
                 }
 
             }
@@ -201,6 +285,11 @@ namespace CombatKata
             //this is known as overloading and is part of polymorphism in OO
             internal void Attack(Character attacker, int damage, int attackDistance = 0)
             {
+                if(IsAlly(attacker))
+                {
+                    return;
+                }
+
                 if (attackDistance <= attacker.GetAttackRange())
                 {
                     decimal damageModifier = CalculateDamageModifier(attacker);
@@ -214,8 +303,17 @@ namespace CombatKata
                 }
             }
 
+            private bool IsAlly(Character attacker)
+            {
+                //This is linq statement and is a terse way of looking for the intersections between
+                //two collections, looping through the collection is acceptable and I don't expect you to know this.
+                //might be worth starting to learning a bit about linq as it is very powerful
+                return Factions.Intersect(attacker.Factions).Any();
+            }
+
             private decimal CalculateDamageModifier(Character attacker)
             {
+
                 if (this.Level - attacker.Level >= 5)
                 {
                     return 0.5m;
@@ -231,7 +329,7 @@ namespace CombatKata
 
             internal void Heal(Character healer, int health)
             {
-                if (this == healer)
+                if (this == healer || IsAlly(healer))
                 {
                     if (Alive)
                     {
@@ -240,6 +338,10 @@ namespace CombatKata
                     }
                 }
             }
+
+            internal void JoinFaction(Faction faction) => Factions.Add(faction);
+
+            internal void LeaveFaction(Faction faction) => Factions.Remove(faction);
         }
     }
 
@@ -249,4 +351,15 @@ namespace CombatKata
         Ranged
 
     }
+
+    enum Faction
+    {
+        Wizard,
+        Ranger,
+        Cleric
+
+    }
+
+
+
 }
