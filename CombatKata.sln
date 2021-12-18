@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatKata", "CombatKata\CombatKata.csproj", "{D09BC2C3-6D49-441D-872B-CB65F182FA7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CombatKataTests", "CombatKata\CombatKataTests.csproj", "{D09BC2C3-6D49-441D-872B-CB65F182FA7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatKataLibrary", "CombatKataLibrary\CombatKataLibrary.csproj", "{3D94B418-8CAE-46DF-BFBE-EE85D589DD58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D09BC2C3-6D49-441D-872B-CB65F182FA7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D09BC2C3-6D49-441D-872B-CB65F182FA7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D09BC2C3-6D49-441D-872B-CB65F182FA7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D94B418-8CAE-46DF-BFBE-EE85D589DD58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D94B418-8CAE-46DF-BFBE-EE85D589DD58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D94B418-8CAE-46DF-BFBE-EE85D589DD58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D94B418-8CAE-46DF-BFBE-EE85D589DD58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
