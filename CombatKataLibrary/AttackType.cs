@@ -1,6 +1,6 @@
 ﻿namespace CombatKata
 {
-    public enum FighterType
+    public enum AttackType
     {
         Melee,
         Ranged

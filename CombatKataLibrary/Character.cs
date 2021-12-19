@@ -6,9 +6,15 @@ namespace CombatKata
 {
     public class Character : GameObject, IDamageable
     {
+        private const int MaximumHealth = 1000;
+        private const int MeleeAttackDistance = 2;
+        private const int RangeAttachedDistance = 20;
+
+        private Dictionary<AttackType, int> attackTypeDistanceLookup = new Dictionary<AttackType, int>() {{ AttackType.Melee, MeleeAttackDistance }, { AttackType.Ranged, RangeAttachedDistance } };
+
         public Character()
         {
-            Health = 1000;
+            Health = MaximumHealth;
         }
 
         //I created this constructor so I can create a character with initial values
@@ -17,31 +23,32 @@ namespace CombatKata
 
         //being a bit lazy here. Defaulting the fighter type to Melee means I don't need to change my old tests.
         //an alternative would be to create another constuctor
-        public Character(int health, int level, bool alive, FighterType fighterType = FighterType.Melee)
+        public Character(int health, int level, bool alive, AttackType fighterType = AttackType.Melee)
         {
             Health = health;
             Level = level;
             Alive = alive;
-            FighterType = fighterType;
+            AttackType = fighterType;
         }
 
         public int Level { get; private set; } = 1;
         public bool Alive { get; private set; } = true;
-        public FighterType FighterType { get; }
+        public AttackType AttackType { get; }
         public IList<Faction> Factions { get; private set; } = new List<Faction>();
 
-        public int GetAttackRange()
+        //now takes a parameter which makes it easier to test
+        //refactored to use dictionary and therefore switch is not required.
+        //means new attack types can be added more easily
+        //potentially you could drive this from a database and therefore not
+        //have to change the code.
+        public int GetAttackRange(AttackType attackType)
         {
-            switch (FighterType)
+            if (attackTypeDistanceLookup.TryGetValue(attackType, out int distance))
             {
-                case FighterType.Melee:
-                    return 2;
-                case FighterType.Ranged:
-                    return 20;
-                default:
-                    throw new Exception();
+                return distance;
             }
 
+            throw new Exception();
         }
 
         //again defaulting attackDistance to zero so I don't need to edit existing calls.
@@ -54,7 +61,7 @@ namespace CombatKata
                 return;
             }
 
-            if (attackDistance <= attacker.GetAttackRange())
+            if (attackDistance <= attacker.GetAttackRange(AttackType))
             {
                 decimal damageModifier = CalculateDamageModifier(attacker);
 

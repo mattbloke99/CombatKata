@@ -130,15 +130,15 @@ namespace CombatKata
         [Fact]
         public void GetMeleeCharacterAttackRangeTest()
         {
-            var character = new Character(1000, 1, true, FighterType.Melee);
+            var character = new Character(1000, 1, true, AttackType.Melee);
 
-            Assert.Equal(2, character.GetAttackRange());
+            Assert.Equal(2, character.GetAttackRange(AttackType.Melee));
         }
 
         [Fact]
         public void CharacterAttackerNotWithinRangeTest()
         {
-            var attacker = new Character(1000, 1, true, FighterType.Melee);
+            var attacker = new Character(1000, 1, true, AttackType.Melee);
             var victim = new Character();
 
             victim.Attack(attacker, 200, 3);
@@ -150,7 +150,7 @@ namespace CombatKata
         [Fact]
         public void CharacterAttackertWithinRangeTest()
         {
-            var attacker = new Character(1000, 1, true, FighterType.Melee);
+            var attacker = new Character(1000, 1, true, AttackType.Melee);
             var victim = new Character();
 
             victim.Attack(attacker, 200, 2);
